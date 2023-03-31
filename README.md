@@ -2,12 +2,42 @@
 Lex2Sent is a text classification/clustering model that can be used with minimal a-priori-information to classify texts into two classes. While the [original paper](https://doi.org/10.48550/arXiv.2209.13023) used it for sentiment analysis on english documents, it is not limited to that purpose, but can be used for any arbitrary type of classification and language as long as there are lexica that can be used as an information-basis.
 
 ## Getting Started
-When installing, please make sure to install all neccessary requirements first
+You may install this package using either pypi
 ```
-pip install -r requirements.txt
+pip install lex2sent
+```
+or GitHub
+```
+pip install pip install git+https://github.com/K-RLange/Lex2Sent.git
 ```
 
-## Examplary Results
+The following is an example of using the Opinion Lexicon to classify an Amazon review data set regarding video games. You may have to use ```nltk.download()``` to download the opinion_lexicon first.
+First we configure our data set 
+```
+from datasets import load_dataset
+from nltk.corpus import opinion_lexicon
+data = load_dataset('LoganKells/amazon_product_reviews_video_games')
+ratings, reviews = [], []
+for stars, text in zip(data["train"]["overall"], data["train"]["reviewText"]):
+    if stars != 3 and text:
+        if stars < 3:
+            ratings.append("negative")
+        else:
+            ratings.append("positive")
+        reviews.append(text)
+```
+And now we can start applying Lex2Sent
+```
+from lex2sent.textClass import *
+lexicon = ClusterLexicon([opinion_lexicon.positive(), opinion_lexicon.negative()])
+rated_texts = RatedTexts(reviews, lexicon, ratings)
+
+#Basic "counting" method of classification:
+count_res = rated_texts.lexicon_classification_eval(label_list=["positive", "negative"])
+l2s_res = rated_texts.lbte(label_list=["positive", "negative"])
+print("Counting accuracy: {count_res}; Lex2Sent accuracy: {l2s_res}")
+```
+yielding the result...
 
 ## Reference
 Please refer to ["Lex2Sent - A bagging approach to unsupervised Sentiment Analysis"](https://doi.org/10.48550/arXiv.2209.13023) when using this package. When you use this package in a publication, please cite it as
