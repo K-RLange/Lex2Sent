@@ -8,7 +8,7 @@ pip install lex2sent
 ```
 or GitHub
 ```
-pip install pip install git+https://github.com/K-RLange/Lex2Sent.git
+pip install git+https://github.com/K-RLange/Lex2Sent.git
 ```
 
 The following is an example of using the Opinion Lexicon to classify an iMDb movie review data set. You may have to use ```nltk.download()``` to download the opinion_lexicon first.
@@ -35,9 +35,9 @@ rated_texts = RatedTexts(reviews, lexicon, ratings)
 #Basic "counting" method of classification:
 count_res = rated_texts.lexicon_classification_eval(label_list=["positive", "negative"])
 l2s_res = rated_texts.lbte(label_list=["positive", "negative"], workers=4)
-print("Counting accuracy: {count_res}; Lex2Sent accuracy: {l2s_res}")
+print("Counting accuracy: {}%; Lex2Sent accuracy: {}%".format(count_res * 100, l2s_res*100))
 ```
-yielding the result...
+yielding the result "Counting accuracy: 73.772%; Lex2Sent accuracy: 78.172%".
 
 ## Reference
 Please refer to ["Lex2Sent - A bagging approach to unsupervised Sentiment Analysis"](https://doi.org/10.48550/arXiv.2209.13023) when using this package. When you use this package in a publication, please cite it as
