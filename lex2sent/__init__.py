@@ -1,2 +1,2 @@
-from Bootstrap import *
-from textClass import *
+from .Bootstrap import *
+from .textClass import *
