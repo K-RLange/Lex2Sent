@@ -4,16 +4,17 @@ VERSION = '0.0.1'
 DESCRIPTION = 'A Python package to perform unsupervised sentiment analysis using lexicon enhanced Document embeddings'
 
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
-
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+print(long_description)
 
 # Setting up
 setup(
     name="lex2sent",
     version=VERSION,
-    long_description=readme(),
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author="Kai-Robin Lange",
     author_email="<kai-robin.lange@tu-dortmund.de>",
     description=DESCRIPTION,
