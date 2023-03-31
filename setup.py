@@ -19,7 +19,7 @@ setup(
     description=DESCRIPTION,
     packages=find_packages(),
     url="https://github.com/K-RLange/Lex2Sent",
-    install_requires=['nltk', 'gensim', "pandas", "itertools", "random", "vaderSentiment",
+    install_requires=['nltk', 'gensim', "pandas", "random", "vaderSentiment",
                       "scipy", "numpy", "io", "operator", "re", "tqdm"],
     keywords=['python', 'sentiment analysis', 'nlp', 'doc2vec', 'bagging', 'text classification'],
     classifiers=[
