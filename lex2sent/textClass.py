@@ -11,7 +11,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from nltk import WordNetLemmatizer
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-import Bootstrap
+import .Bootstrap
 from itertools import product
 import pandas as pd
 from random import seed, sample
