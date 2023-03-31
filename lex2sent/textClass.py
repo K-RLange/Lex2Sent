@@ -272,8 +272,10 @@ class RatedTexts:
                 "No lexicon provided. The default lexicon 'VADER' will be used."
             )
             lexicon = ClusterLexicon()
-        if label_list is None:
+        if not label_list and ratings:
             self.label_list = list(set(ratings))
+        else:
+            self.label_list = ["__label__CLUSTER1", "__label__CLUSTER2"]
         if unprocessed_texts is None and texts is None:
             warnings.warn("No texts provided. Initializing texts as None.")
         self.unprocessed_texts = unprocessed_texts
