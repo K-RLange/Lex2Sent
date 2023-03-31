@@ -11,16 +11,16 @@ or GitHub
 pip install pip install git+https://github.com/K-RLange/Lex2Sent.git
 ```
 
-The following is an example of using the Opinion Lexicon to classify an Amazon review data set regarding video games. You may have to use ```nltk.download()``` to download the opinion_lexicon first.
+The following is an example of using the Opinion Lexicon to classify an iMDb movie review data set. You may have to use ```nltk.download()``` to download the opinion_lexicon first.
 First we configure our data set 
 ```
 from datasets import load_dataset
 from nltk.corpus import opinion_lexicon
-data = load_dataset('LoganKells/amazon_product_reviews_video_games')
+data = load_dataset('imdb')
 ratings, reviews = [], []
-for stars, text in zip(data["train"]["overall"], data["train"]["reviewText"]):
-    if stars != 3 and text:
-        if stars < 3:
+for stars, text in zip(data["train"]["label"], data["train"]["text"]):
+    if text:
+        if stars == 0:
             ratings.append("negative")
         else:
             ratings.append("positive")
@@ -34,7 +34,7 @@ rated_texts = RatedTexts(reviews, lexicon, ratings)
 
 #Basic "counting" method of classification:
 count_res = rated_texts.lexicon_classification_eval(label_list=["positive", "negative"])
-l2s_res = rated_texts.lbte(label_list=["positive", "negative"])
+l2s_res = rated_texts.lbte(label_list=["positive", "negative"], workers=4)
 print("Counting accuracy: {count_res}; Lex2Sent accuracy: {l2s_res}")
 ```
 yielding the result...
@@ -55,6 +55,7 @@ Please refer to ["Lex2Sent - A bagging approach to unsupervised Sentiment Analys
 ```
 ## Future Features
 -Calling from the console
+
 -FastText and SentenceBERT as alternatives to Doc2Vec
--Allowing for multiple workers for parallel computing
+
 -Options to classify into more than two clusters
