@@ -53,3 +53,8 @@ Please refer to ["Lex2Sent - A bagging approach to unsupervised Sentiment Analys
 	keywords = {Computer Science - Computation and Language},
 }
 ```
+## Future Features
+-Calling from the console
+-FastText and SentenceBERT as alternatives to Doc2Vec
+-Allowing for multiple workers for parallel computing
+-Options to classify into more than two clusters
