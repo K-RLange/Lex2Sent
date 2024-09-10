@@ -1,6 +1,7 @@
 import pickle
 import re
 import logging
+from typing import List, Tuple, Union
 from tqdm import tqdm
 import warnings
 from vaderSentiment import vaderSentiment
@@ -32,19 +33,26 @@ class ClusterLexicon:
     cluster2 = []
     amplifiers = {}
 
-    def __init__(self, lexicon=None, negations=None, amplifiers=None):
+    def __init__(self, lexicon: dict = None, negations: list = None,
+                 amplifiers: list = None):
         """
         Initializes the Lexicon using a dict or list of lists of
         cluster words and possibly lists of negations and amplifiers
         Args:
-            lexicon: dict or list of lists. The lexicon that is to be used.
-            negations: list of strings. Words that are to be considered as
-                       negations.
-            amplifiers: list of strings. Words that are to be considered as
-                        amplifiers.
+            lexicon: The lexicon that is to be used.
+            negations: Words that are to be considered as negations.
+            amplifiers: Words that are to be considered as amplifiers.
         Returns:
             None
         """
+        if not isinstance(lexicon, dict) and lexicon is not None:
+            raise Exception(
+                "The lexicon must be a dict or a list of lists of strings!"
+            )
+        if not isinstance(negations, list) and negations is not None:
+            raise Exception("Negations must be a list of strings!")
+        if not isinstance(amplifiers, list) and amplifiers is not None:
+            raise Exception("Amplifiers must be a list of strings!")
         if amplifiers is None:
             amplifiers = vaderSentiment.BOOSTER_DICT
         if negations is None:
@@ -91,15 +99,17 @@ class ClusterLexicon:
             dict(zip(negations, [-0.5 for x in range(len(negations))]))
         )
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str):
         """
         Returns the value of a word if it is part of the lexicon.
         Args:
-            item: string. The word that is to be searched.
+            item: The word that is to be searched.
         Returns:
             The lexicon value, amplifier value for the word or an
             exception if the word is not part of the lexicon.
         """
+        if not isinstance(item, str):
+            raise Exception("The item must be a string!")
         if item in self.full_dict:
             return self.full_dict[item]
         elif item in self.amplifiers:
@@ -107,14 +117,16 @@ class ClusterLexicon:
         else:
             raise Exception("The chosen item is not part of the lexicon")
 
-    def __contains__(self, item):
+    def __contains__(self, item: str):
         """
         Checks if a word is part of the lexicon
         Args:
-            item: string. The word that is to be searched.
+            item: The word that is to be searched.
         Returns:
             True if the word is part of the lexicon, False otherwise.
         """
+        if not isinstance(item, str):
+            raise Exception("The item must be a string!")
         if item in self.full_dict or item in self.amplifiers:
             return True
         else:
@@ -132,42 +144,50 @@ class ClusterLexicon:
         """
         return [key for key, value in self.amplifiers.items() if value > 1]
 
-    def add_amplifiers(self, amplifiers):
+    def add_amplifiers(self, amplifiers: list):
         """
         Adds a list of amplifiers to the lexicon.
         Args:
-            amplifiers: list of strings. The amplifiers that are to be added.
+            amplifiers: The amplifiers that are to be added.
         Returns:
             None
         """
+        if not isinstance(amplifiers, list):
+            raise Exception("The amplifiers must be a list of strings!")
         self.amplifiers.update(
             dict(zip(amplifiers, [2 for x in range(len(amplifiers))]))
         )
 
-    def add_negations(self, negations):
+    def add_negations(self, negations: list):
         """
         Adds a list of negations to the lexicon without adding "neg"+word to
         the lexicon halves.
         Args:
-            negations: list of strings. The negations that are to be added.
+            negations: The negations that are to be added.
         Returns:
             None
         """
+        if not isinstance(negations, list):
+            raise Exception("The negations must be a list of strings!")
         self.amplifiers.update(
             dict(zip(negations, [-0.5 for x in range(len(negations))]))
         )
 
-    def check_text(self, text):
+    def check_text(self, text: list):
         """
         Creates a classifier value of the given text by "counting" cluster
         words within. Negations and amplifiers are also used if
         provided within the class variables.
         Args:
-            text: list of strings. The text that is to be analyzed.
+            text: The text that is to be analyzed.
         Returns:
             The classifier value of the text. Negative values indicate a
             text belonging to cluster 1.
         """
+        if not isinstance(text, list):
+            raise Exception("The text must be a list of strings!")
+        if not isinstance(text[0], str):
+            raise Exception("The text must be a list of strings!")
         if not self.amplifiers:
             return sum(
                 list(
@@ -193,16 +213,20 @@ class ClusterLexicon:
                     amplifier = 1
             return sent_classifier
 
-    def count(self, text):
+    def count(self, text: list):
         """
         Returns a "counting" value of the lexicon, displaying the difference
         in occurrences of cluster words in a text.
         Args:
-            text: list of strings. The text that is to be analyzed.
+            text: The text that is to be analyzed.
         Returns:
             The "counting" value of the text. Negative values indicate a
             text belonging to cluster 2.
         """
+        if not isinstance(text, list):
+            raise Exception("The text must be a list of strings!")
+        if not isinstance(text[0], str):
+            raise Exception("The text must be a list of strings!")
         return sum(
             list(
                 map(
@@ -240,11 +264,11 @@ class RatedTexts:
 
     def __init__(
             self,
-            unprocessed_texts=None,
-            lexicon=None,
-            ratings=None,
-            texts=None,
-            label_list=None,
+            unprocessed_texts: list = None,
+            lexicon: ClusterLexicon = None,
+            ratings: list = None,
+            texts: list = None,
+            label_list: list = None,
             **kwargs
     ):
         """
@@ -267,6 +291,24 @@ class RatedTexts:
         Returns:
             None
         """
+        if not isinstance(unprocessed_texts, list) and unprocessed_texts is not None:
+            raise Exception("The unprocessed_texts must be a list of strings!")
+        if unprocessed_texts is not None and not isinstance(unprocessed_texts[0], str):
+            raise Exception("The unprocessed_texts must be a list of strings!")
+        if not isinstance(lexicon, ClusterLexicon) and lexicon is not None:
+            raise Exception(
+                "The lexicon must be a ClusterLexicon object or None!"
+            )
+        if not isinstance(ratings, list) and ratings is not None:
+            raise Exception("The ratings must be a list of strings!")
+        if ratings is not None and not isinstance(ratings[0], str):
+            raise Exception("The ratings must be a list of strings!")
+        if not isinstance(texts, list) and texts is not None:
+            raise Exception("The texts must be a list of lists of strings!")
+        if texts is not None and not isinstance(texts[0], list):
+            raise Exception("The texts must be a list of lists of strings!")
+        if not isinstance(label_list, list) and label_list is not None:
+            raise Exception("The label_list must be a list of strings!")
         if lexicon is None:
             warnings.warn(
                 "No lexicon provided. The default lexicon 'VADER' will be used."
@@ -288,32 +330,41 @@ class RatedTexts:
         self.ratings = ratings
         self.number_of_texts = len(self.texts)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         """
         Returns the text with a given index
         Args:
-            index: int. Index of the text
+            index: Index of the text
         Returns:
             The preprocessed text with the given index as one string or the
             rating and the preprocessed text if available.
         """
+        if not isinstance(index, int):
+            if int(index) == index:
+                index = int(index)
+            else:
+                raise Exception("The index must be an integer!")
         try:
             return " ".join([self.ratings[index]] + self.texts[index])
         except IndexError as e:
             return " ".join(self.texts[index])
 
-    def process_texts(self, texts, **kwargs):
+    def process_texts(self, texts: list, **kwargs):
         """
         Applies preprocessing to the unprocessed texts. Lemmatization,
         tokenization, punctuation removal and stopword removal is applied.
         Words included in the lexicon are not used as stop words.
         Args:
-            texts: list of strings. Texts that are to be processed.
+            texts: Texts that are to be processed.
             kwargs: additional arguments. Can include "lemmatizer",
                     "tokenizer" and "stop_words" to change the default options
         Returns:
             Tokenized and preprocessed texts as a list of lists of strings
         """
+        if not isinstance(texts, list) and texts is not None:
+            raise Exception("The texts must be a list of lists of strings!")
+        if texts is not None and not isinstance(texts[0], list):
+            raise Exception("The texts must be a list of lists of strings!")
         logging.info("Starting preprocessing...")
         if "lemmatizer" in kwargs:
             lemmatizer = kwargs["lemmatizer"]
@@ -376,7 +427,7 @@ class RatedTexts:
                 processed_texts[x] = texts[x]
         return processed_texts
 
-    def add_lexicon(self, lexicon):
+    def add_lexicon(self, lexicon: ClusterLexicon):
         """
         Adds a lexicon of choice to the RatedTexts object (does not change the
         processing of texts done before)
@@ -385,19 +436,27 @@ class RatedTexts:
         Returns:
             None
         """
+        if not isinstance(lexicon, ClusterLexicon):
+            raise Exception("The lexicon must be a ClusterLexicon object!")
         self.lexicon = lexicon
 
-    def get_classification_rate(self, prediction, index=None):
+    def get_classification_rate(self, prediction: list, index: list = None):
         """
         Returns the classification rate of given predicted labels.
         Args:
-            prediction: list. Predicted labels
-            index: list. Index of the labels that should be compared.
+            prediction: Predicted labels
+            index: Index of the labels that should be compared.
                    Optional and only used if not the entire dataset
                    should be compared.
         Returns:
             The classification rate as a float.
         """
+        if not isinstance(prediction, list):
+            raise Exception("The prediction must be a list!")
+        if not isinstance(prediction[0], str):
+            raise Exception("The prediction must be a list of strings!")
+        if not isinstance(index, list) and index is not None:
+            raise Exception("The index must be a list!")
         if index is None:
             if len(prediction) != self.number_of_texts:
                 raise Exception(
@@ -424,18 +483,24 @@ class RatedTexts:
         """
         return list(map(" ".join, self.texts))
 
-    def write_to_file(self, file, prediction=None, index=None):
+    def write_to_file(self, file: list, prediction: list = None, index: int = None):
         """
         Writes the corpus and given labels to a certain path as a .txt-file
         Args:
-            file: str. Path to write the files to
-            prediction: list. Predicted labels. If None, the true labels
+            file: Path to write the files to
+            prediction: Predicted labels. If None, the true labels
                         (self.ratings) are used.
-            index: int. Is used if only a part of the corpus is supposed to
+            index: Is used if only a part of the corpus is supposed to
                    be saved.
         Returns:
             None
         """
+        if not isinstance(file, str):
+            raise Exception("The file must be a string!")
+        if not isinstance(prediction, list) and prediction is not None:
+            raise Exception("The prediction must be a list!")
+        if not isinstance(index, list) and index is not None:
+            raise Exception("The index must be a list!")
         if prediction is None:
             prediction = self.ratings
         full_texts = self.texts_as_string()
@@ -454,7 +519,7 @@ class RatedTexts:
             for x in new_texts:
                 f.write(x)
 
-    def to_pickle(self, file):
+    def to_pickle(self, file: str):
         """
         Saves the RatedTexts object as a pickle-file
         Args:
@@ -462,13 +527,28 @@ class RatedTexts:
         Returns:
             None
         """
+        if not isinstance(file, str):
+            raise Exception("The file must be a string!")
         with open(file, "wb") as output_file:
             pickle.dump(self, output_file)
 
-    def update(self, texts=None, ratings=None, unprocessed_texts=None):
+    def update(self, texts: list = None, ratings: list = None,
+               unprocessed_texts: list = None):
         """
         Replaces the class variables with other objects.
         """
+        if not isinstance(texts, list) and texts is not None:
+            raise Exception("The texts must be a list of lists of strings!")
+        if texts is not None and not isinstance(texts[0], list):
+            raise Exception("The texts must be a list of lists of strings!")
+        if not isinstance(ratings, list) and ratings is not None:
+            raise Exception("The ratings must be a list of strings!")
+        if ratings is not None and not isinstance(ratings[0], str):
+            raise Exception("The ratings must be a list of strings!")
+        if not isinstance(unprocessed_texts, list) and unprocessed_texts is not None:
+            raise Exception("The unprocessed_texts must be a list of strings!")
+        if unprocessed_texts is not None and not isinstance(unprocessed_texts[0], str):
+            raise Exception("The unprocessed_texts must be a list of strings!")
         if texts is not None:
             self.texts = texts
             self.number_of_texts = len(texts)
@@ -492,7 +572,7 @@ class RatedTexts:
             self.texts.copy()
         )
 
-    def reduce_size(self, new_size):
+    def reduce_size(self, new_size: fload):
         """
         Reduces the corpus size to a certain percentage. A deterministic
         version of draw_subsamples.
@@ -501,11 +581,13 @@ class RatedTexts:
         Returns:
             None
         """
+        if not isinstance(new_size, float):
+            raise Exception("The new_size must be a float!")
         self.number_of_texts = round(self.number_of_texts * new_size)
         self.texts = self.texts[0:self.number_of_texts]
         self.ratings = self.ratings[0:self.number_of_texts]
 
-    def draw_subsamples(self, percent):
+    def draw_subsamples(self, percent: float):
         """
         Randomly draws subsamples of the texts from the corpus to a certain
         percentage. Each text is chosen randomly.
@@ -514,6 +596,8 @@ class RatedTexts:
         Returns:
             None
         """
+        if not isinstance(percent, float):
+            raise Exception("The percent must be a float!")
         indices = sample(
             range(self.number_of_texts),
             round(self.number_of_texts * percent / 100),
@@ -526,18 +610,19 @@ class RatedTexts:
             )
         self.number_of_texts = round(self.number_of_texts * percent / 100)
 
-    def lexicon_classification(self, lexicon=None):
+    def lexicon_classification(self, lexicon: ClusterLexicon = None):
         """
         Creates a classifier by using a lexicon "counting" method. Either uses
         the lexicon saved within this RatedTexts
         object or one provided as an input.
         Args:
-            lexicon: Object of the ClusterLexicon class. Is used as to
-                     classify the texts by.
+            lexicon: Is used as to classify the texts by.
         Returns:
             List of floats representing lexicon "counting" values to label
             or sort the texts by.
         """
+        if not isinstance(lexicon, ClusterLexicon) and lexicon is not None:
+            raise Exception("The lexicon must be a ClusterLexicon object!")
         if self.lexicon is None and lexicon is None:
             raise Exception(
                 """The RatedTexts object must either contain a ClusterLexicon
@@ -550,12 +635,17 @@ class RatedTexts:
         else:
             return list(map(lambda x: self.lexicon.check_text(x), self.texts))
 
-    def lexicon_classification_eval(self, lexicon=None, label_list=None):
+    def lexicon_classification_eval(self, lexicon: ClusterLexicon = None,
+                                    label_list: list = None):
         """
         Evaluates the lexicon classification by using the true labels.
         Returns:
             The classification rate as a float between [0,1].
         """
+        if not isinstance(lexicon, ClusterLexicon) and lexicon is not None:
+            raise Exception("The lexicon must be a ClusterLexicon object!")
+        if not isinstance(label_list, list) and label_list is not None:
+            raise Exception("The label_list must be a list of strings!")
         if self.ratings is None:
             raise Exception(
                 """The RatedTexts object must contain the true labels to
@@ -570,16 +660,16 @@ class RatedTexts:
 
     def lbte(
             self,
-            resampling=Bootstrap.bw_resampling,
-            rng_seed=0,
-            threshold=0,
-            grid=None,
-            sorting="absolute",
-            pre_resampling_sorting=False,
-            label_list=None,
-            path="",
-            verbose=True,
-            workers=1,
+            resampling: object = Bootstrap.bw_resampling,
+            rng_seed: int =0,
+            threshold: Union[int, float] = 0,
+            grid: dict = None,
+            sorting: str = "absolute",
+            pre_resampling_sorting: bool = False,
+            label_list: list = None,
+            path: str = "",
+            verbose: bool = True,
+            workers: int = 1,
     ):
         """
         Performs unsupervised sentiment analysis using lexicon-based text
@@ -612,6 +702,24 @@ class RatedTexts:
         Returns:
             float. Classification rate.
         """
+        if not isinstance(resampling, object):
+            raise Exception("The resampling must be a function!")
+        if not isinstance(rng_seed, int):
+            raise Exception("The rng_seed must be an integer!")
+        if not isinstance(threshold, (float, list)):
+            raise Exception("The threshold must be a float or a list!")
+        if not isinstance(sorting, str):
+            raise Exception("The sorting must be a string!")
+        if not isinstance(pre_resampling_sorting, bool):
+            raise Exception("The pre_resampling_sorting must be a boolean!")
+        if not isinstance(label_list, list) and label_list is not None:
+            raise Exception("The label_list must be a list of strings!")
+        if not isinstance(path, str):
+            raise Exception("The path must be a string!")
+        if not isinstance(verbose, bool):
+            raise Exception("The verbose must be a boolean!")
+        if not isinstance(workers, int):
+            raise Exception("The workers must be an integer!")
         if label_list is None:
             label_list = self.label_list
         if grid is None:
@@ -719,9 +827,9 @@ class RatedTexts:
 
     def sent_for_threshold(
             self,
-            classifier,
-            threshold=0,
-            label_list=None,
+            classifier: list,
+            threshold: int = 0,
+            label_list: list = None,
     ):
         """
         Assigns labels based on the values saved inside a classifier
@@ -739,6 +847,12 @@ class RatedTexts:
             the labels vector. The chosen_texts vector is only relevant if two
             separate thresholds are chosen.
         """
+        if not isinstance(classifier, list):
+            raise Exception("The classifier must be a list!")
+        if not isinstance(threshold, (float, list)):
+            raise Exception("The threshold must be a float or a list!")
+        if not isinstance(label_list, list) and label_list is not None:
+            raise Exception("The label_list must be a list of strings!")
         if label_list is None:
             label_list = self.label_list
         if threshold == 0:

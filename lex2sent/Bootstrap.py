@@ -1,36 +1,52 @@
 from random import random, shuffle
 
 
-def new_choices(population, k=1):
+def new_choices(population: list, k: int = 1):
     """
-    Draws samples with replacement.
+    Draws samples with replacement. An alternative version for random.choices.
     Args:
-        population: list. Population of which a Bootstrap is to be drawn.
-        k: int. Number of samples to draw.
+        population: Population of which a Bootstrap is to be drawn.
+        k: Number of samples to draw.
     Returns:
         k-dimensional list containing random samples from population.
     """
     _int = int
-    if type(population) is not list:
+    if not isinstance(population, list):
         population = [population]
+    if not isinstance(k, int):
+        if int(k) == k:
+            k = int(k)
+        else:
+            raise ValueError("k must be an integer")
     total = len(population)
     return [population[_int(random() * total)] for i in range(k)]
 
 
-def bnf_dict_creation(text, window=3, forward=False):
+def bnf_dict_creation(text: list, window: int = 3, forward: bool = False):
     """
     Creates a dict of context words for every word in a text given a window size
     Args:
         text: list of strings. The text (with correct sentence structure) that
               is to be resampled.
-        window: int. Window size
-        forward: boolean. Is the window only expanding in front or also behind
+        window: Window size
+        forward: Is the window only expanding in front or also behind
                  the current word?
     Returns:
         dict. Contains the context words of each word.
     """
+    if not isinstance(text, list):
+        raise ValueError("text must be a list of strings")
+    if not isinstance(text[0], str):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(window, int):
+        if int(window) == window:
+            window = int(window)
+        else:
+            raise ValueError("window must be an integer")
+    if not isinstance(forward, bool):
+        raise ValueError("forward must be a boolean")
     set_of_words = dict(zip(text, [[] for x in range(len(text))]))
-    for inner_index in range(len(text)):
+    for inner_index, _ in enumerate(text):
         word = text[inner_index]
         if forward:
             distance = 1
@@ -51,7 +67,7 @@ def bnf_dict_creation(text, window=3, forward=False):
     return set_of_words
 
 
-def bnf_resampling(texts, forward=True):
+def bnf_resampling(texts: list, forward: bool = True):
     """
     Executes a markov-text-resampling based on the context of each word. After
     sampling one word, one of the three words that follow up on it in the
@@ -59,18 +75,26 @@ def bnf_resampling(texts, forward=True):
     Args:
         texts: list of lists of strings. Each list represents a text and
                each string represents a word.
-        forward: boolean. Should the window exceed only after the current
+        forward: Should the window exceed only after the current
                  word (True, default) or should it exceed in both directions
                  of the text (False)?
     Returns:
         list of lists of strings. Resampled texts.
     """
+    if not isinstance(texts, list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0], list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0][0], str):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(forward, bool):
+        raise ValueError("forward must be a boolean")
     new_texts = [[] for text in texts]
     for index in range(len(texts)):
         text = texts[index]
         latest = None
         word_list = bnf_dict_creation(text, forward=forward)
-        for word in text:
+        for _ in text:
             if latest is None:
                 latest = new_choices(list(word_list.keys()))[0]
             else:
@@ -79,7 +103,7 @@ def bnf_resampling(texts, forward=True):
     return new_texts
 
 
-def bw_resampling(texts):
+def bw_resampling(texts: list):
     """
     Applies simple inner-text word-based bootstrap to a list of texts.
     Args:
@@ -88,14 +112,20 @@ def bw_resampling(texts):
     Returns:
         list of lists of strings. Resampled texts.
     """
-    new_texts = [[] for text in texts]
+    if not isinstance(texts, list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0], list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0][0], str):
+        raise ValueError("texts must be a list of lists of strings")
+    new_texts = [[] for _ in texts]
     for current_text in range(len(texts)):
         text = texts[current_text]
         new_texts[current_text] = new_choices(text, len(text))
     return new_texts
 
 
-def bwp_resampling(texts):
+def bwp_resampling(texts: list):
     """
     Permutes all words inside each text.
     Args:
@@ -104,6 +134,12 @@ def bwp_resampling(texts):
     Returns:
         list of lists of strings. Resampled texts.
     """
+    if not isinstance(texts, list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0], list):
+        raise ValueError("texts must be a list of lists of strings")
+    if not isinstance(texts[0][0], str):
+        raise ValueError("texts must be a list of lists of strings")
     new_texts = []
     for current_text in range(len(texts)):
         text = texts[current_text]
